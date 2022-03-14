@@ -4,4 +4,4 @@ Assignment 3**
 
 https://react-app-hw3.herokuapp.com/#/signin
 
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://god.postman.co/run-collection/582cc03a4737d6fe20d4?action=collection%2Fimport)
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/eb97c26a683be7fdb570?action=collection%2Fimport)
