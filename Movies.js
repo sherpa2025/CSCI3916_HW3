@@ -1,6 +1,5 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var bcrypt = require('bcrypt-nodejs');
 
 mongoose.Promise = global.Promise;
 
@@ -13,11 +12,14 @@ try {
 }
 mongoose.set('useCreateIndex', true);
 
-//movies Schema
-var MoviesSchema = new Schema({
-    title: { type: String, required: true, index: { unique: true }},
-    releaseYear: { type: String, required: true},
-    genre: { type: String, required: true},
-    actors: {type: Array, required: true}
+//movies schema
+let MovieSchema = new Schema({
+    title: {type: String, required: true, index: { unique: true}},
+    releaseYear: {type: String, required: true},
+    genre: {type: String, required: true},
+    actors: [{ActorName: String, CharacterName: String}]
 });
-module.exports = mongoose.model('Movies', MoviesSchema);
+
+
+//return the model to server
+module.exports = mongoose.model('Movie', MovieSchema);
