@@ -201,6 +201,99 @@ router.route('/movies/:title')
         res.json({success: false, message: 'Movie with the movie parameter cannot be saved!'});
     });
 
+
+router.route('/reviews')
+    .post(authJwtController.isAuthenticated,function (req, res) {
+        // Todo: check reviewer name is in database?
+        if (!req.body.Name) {
+            res.json({success: false, message: "Username needed!"})
+        }
+        else if (!req.body.movieTitle) {
+            res.json({success: false, message: "Must have the title of the movie being reviewed."})
+        } else if (!req.body.rating) {
+            res.json({success: false, message: "Movie review must have a rating."})
+        } else if (req.body.rating < 1 || req.body.rating > 5) {
+            res.json({success: false, message: "Rating must be between 1 and 5."})
+        } else
+            Movie.findOne({Title: req.body.movieTitle}).select('Title').exec(function (err, movieFound) {
+                if (err) res.send(err);
+
+                if (movieFound) {
+                    var reviewNew = new Review();
+                    reviewNew.Name = req.body.Name;
+                    reviewNew.movieTitle = req.body.movieTitle;
+                    reviewNew.review = req.body.review;
+                    reviewNew.rating = req.body.rating;
+
+                    // save the movie
+                    reviewNew.save(function (err) {
+                        if (err) {
+                            return res.send(err);
+                        } else {
+                            res.json({success: true, message: 'New review created!'});
+                        }
+                    })
+                } else {
+                    //var movieTitle = req.body.movieTitle.replace(/\//g, '')
+                    res.status(400);
+                    res.json({message: "The movie \'" + req.body.movieTitle + "\' does not exist in the database."});
+                }
+            })
+    });
+
+router.route('/reviews')
+    .get(authJwtController.isAuthenticated, function (req, res) {
+        var title = req.body.Title;
+
+        if (req.query.reviews === 'true'){
+
+            Movie.findOne({Title: req.body.Title}).select('Title').exec(function (err, movieFound) {
+                if (err) res.send(err);
+
+                else if(movieFound)
+                {
+                    Movie.aggregate([
+                        {
+                            $match: {
+                                Title: title
+                            }
+                        },
+                        {
+                            "$lookup":
+                                {
+                                    from: "reviews",
+                                    localField: "Title",
+                                    foreignField: "movieTitle",
+                                    as: "movieReviews"
+                                }
+                        }
+                    ]).exec((err, movieReview) => {
+                        if (err) res.json({message: "Failed"});
+                        res.json(movieReview);
+                    })
+
+                }
+                else {res.status(400);
+                    res.json({success: false, message: "The movie '" + title + "' is not in the database."});
+                }
+            });
+        }
+
+        else {   // else the review query not set to true, just return the movie without the review
+            Movie.findOne({Title: title}).exec(function (err, movieFound) {
+                if (err) res.send(err);
+
+                if (movieFound == null) {
+                    res.status(400);
+                    res.json({success: false, message: "The movie '" + title + "' is not in the database."});
+                }
+
+                else {
+                    res.json(movieFound)
+                }
+            })
+        }
+    });
 app.use('/', router);
 app.listen(process.env.PORT || 8080);
 module.exports = app; // for testing only
