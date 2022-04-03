@@ -215,7 +215,7 @@ router.route('/reviews')
         } else if (req.body.rating < 1 || req.body.rating > 5) {
             res.json({success: false, message: "Rating must be between 1 and 5."})
         } else
-            Movie.findOne({Title: req.body.movieTitle}).select('Title').exec(function (err, movieFound) {
+            Movie.findOne({title: req.body.movieTitle}).select('title').exec(function (err, movieFound) {
                 if (err) res.send(err);
 
                 if (movieFound) {
@@ -247,7 +247,7 @@ router.route('/reviews')
 
         if (req.query.reviews === 'true'){
 
-            Movie.findOne({title: req.body.title}).select('Title').exec(function (err, movieFound) {
+            Movie.findOne({title: req.body.title}).select('title').exec(function (err, movieFound) {
                 if (err) res.send(err);
 
                 else if(movieFound)
@@ -262,7 +262,7 @@ router.route('/reviews')
                             "$lookup":
                                 {
                                     from: "reviews",
-                                    localField: "Title",
+                                    localField: "title",
                                     foreignField: "movieTitle",
                                     as: "movieReviews"
                                 }
