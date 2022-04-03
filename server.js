@@ -215,11 +215,11 @@ router.route('/reviews')
         } else if (req.body.rating < 1 || req.body.rating > 5) {
             res.json({success: false, message: "Rating must be between 1 and 5."})
         } else
-            Movie.findOne({title: req.body.movieTitle}).select('title').exec(function (err, movieFound) {
+            Movie.findOne({title: req.body.movieTitle}).select('title releaseYear genre actors').exec(function (err, movieFound) {
                 if (err) res.send(err);
 
                 if (movieFound) {
-                    var reviewNew = new Review();
+                    let reviewNew = new Review();
                     reviewNew.Name = req.body.Name;
                     reviewNew.movieTitle = req.body.movieTitle;
                     reviewNew.review = req.body.review;
