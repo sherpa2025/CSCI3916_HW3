@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const User = require('./Users');
 const Movie = require("./Movies");
-const Review = require('./Reviews');
+
 
 const app = express();
 app.use(cors());
@@ -203,97 +203,6 @@ router.route('/movies/:title')
     });
 
 
-router.route('/reviews')
-    .post(authJwtController.isAuthenticated,function (req, res) {
-        if (!req.body.Name) {
-            res.json({success: false, message: "Username needed!"})
-        }
-        else if (!req.body.movieTitle) {
-            res.json({success: false, message: "Must have the title of the movie being reviewed."})
-        } else if (!req.body.rating) {
-            res.json({success: false, message: "Movie review must have a rating."})
-        } else if (req.body.rating < 1 || req.body.rating > 5) {
-            res.json({success: false, message: "Rating must be between 1 and 5."})
-        } else
-            Movie.findOne({title: req.body.movieTitle}).select('title').exec(function (err, movieFound) {
-                if (err) res.send(err);
-
-                if (movieFound) {
-                    let reviewNew = new Review();
-                    reviewNew.Name = req.body.Name;
-                    reviewNew.movieTitle = req.body.movieTitle;
-                    reviewNew.review = req.body.review;
-                    reviewNew.rating = req.body.rating;
-
-                    // save the movie
-                    reviewNew.save(function (err) {
-                        if (err) {
-                            return res.send(err);
-                        } else {
-                            res.json({success: true, message: 'New review created!'});
-                        }
-                    })
-                } else {
-                    //var movieTitle = req.body.movieTitle.replace(/\//g, '')
-                    res.status(400);
-                    res.json({message: "The movie \'" + req.body.movieTitle + "\' does not exist in the database."});
-                }
-            })
-    });
-
-router.route('/reviews')
-    .get(authJwtController.isAuthenticated, function (req, res) {
-        var title = req.body.title;
-
-        if (req.query.reviews === 'true'){
-
-            Movie.findOne({title: req.body.title}).select('title').exec(function (err, movieFound) {
-                if (err) res.send(err);
-
-                else if(movieFound)
-                {
-                    Movie.aggregate([
-                        {
-                            $match: {
-                                title: title
-                            }
-                        },
-                        {
-                            "$lookup":
-                                {
-                                    from: "reviews",
-                                    localField: "title",
-                                    foreignField: "movieTitle",
-                                    as: "movieReviews"
-                                }
-                        }
-                    ]).exec((err, movieReview) => {
-                        if (err) res.json({message: "Failed"});
-                        res.json(movieReview);
-                    })
-
-                }
-                else {res.status(400);
-                    res.json({success: false, message: "The movie '" + title + "' is not in the database."});
-                }
-            });
-        }
-
-        else {   // else the review query not set to true, just return the movie without the review
-            Movie.findOne({title: title}).exec(function (err, movieFound) {
-                if (err) res.send(err);
-
-                if (movieFound == null) {
-                    res.status(400);
-                    res.json({success: false, message: "The movie '" + title + "' is not in the database."});
-                }
-
-                else {
-                    res.json(movieFound)
-                }
-            })
-        }
-    });
 app.use('/', router);
 app.listen(process.env.PORT || 8080);
 module.exports = app; // for testing only
