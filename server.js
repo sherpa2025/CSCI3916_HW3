@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const User = require('./Users');
 const Movie = require("./Movies");
+const Review = require('./Reviews');
 
 const app = express();
 app.use(cors());
@@ -204,7 +205,6 @@ router.route('/movies/:title')
 
 router.route('/reviews')
     .post(authJwtController.isAuthenticated,function (req, res) {
-        // Todo: check reviewer name is in database?
         if (!req.body.Name) {
             res.json({success: false, message: "Username needed!"})
         }
@@ -215,7 +215,7 @@ router.route('/reviews')
         } else if (req.body.rating < 1 || req.body.rating > 5) {
             res.json({success: false, message: "Rating must be between 1 and 5."})
         } else
-            Movie.findOne({title: req.body.movieTitle}).select('title releaseYear genre actors').exec(function (err, movieFound) {
+            Movie.findOne({title: req.body.movieTitle}).select('title').exec(function (err, movieFound) {
                 if (err) res.send(err);
 
                 if (movieFound) {
