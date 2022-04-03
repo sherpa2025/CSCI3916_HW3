@@ -243,11 +243,11 @@ router.route('/reviews')
 
 router.route('/reviews')
     .get(authJwtController.isAuthenticated, function (req, res) {
-        var title = req.body.Title;
+        var title = req.body.title;
 
         if (req.query.reviews === 'true'){
 
-            Movie.findOne({Title: req.body.Title}).select('Title').exec(function (err, movieFound) {
+            Movie.findOne({title: req.body.title}).select('Title').exec(function (err, movieFound) {
                 if (err) res.send(err);
 
                 else if(movieFound)
@@ -255,7 +255,7 @@ router.route('/reviews')
                     Movie.aggregate([
                         {
                             $match: {
-                                Title: title
+                                title: title
                             }
                         },
                         {
@@ -280,7 +280,7 @@ router.route('/reviews')
         }
 
         else {   // else the review query not set to true, just return the movie without the review
-            Movie.findOne({Title: title}).exec(function (err, movieFound) {
+            Movie.findOne({title: title}).exec(function (err, movieFound) {
                 if (err) res.send(err);
 
                 if (movieFound == null) {
